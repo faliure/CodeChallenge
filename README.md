@@ -2,11 +2,11 @@
 
 The main goal of this challenge is to get a sense of your coding style and choices.
 
-The code challenge does not involve any exotic or bleeding-edge technologies, tools, etc. and that's the point: We'd like to focus on your code style and not get distracted. 
+The code challenge does not involve any exotic or bleeding-edge technologies, tools, etc. and that's the point: We'd like to focus on your code style and not get distracted.
 
 On that note, we're also not looking for "rights and wrongs", and there are no "trick parts" in this challenge. We would merely like to get a more profound impression of how you write code.
 
-That also allows us to have a more fruitful and constructive discussion at the technical interview. We're not fans of white-boarding at interviews so we'd much rather have some concrete code to talk about. We think that makes the interview much more enjoyable and productive. 
+That also allows us to have a more fruitful and constructive discussion at the technical interview. We're not fans of white-boarding at interviews so we'd much rather have some concrete code to talk about. We think that makes the interview much more enjoyable and productive.
 
 
 ## Your challenge/task
@@ -18,7 +18,7 @@ Our Designer (feature requester) wrote the following:
 > Hey Devs.
 >
 > We would like to improve the gamification of our course platform because we think it will help keep our users more engaged - and thus learn more. We want to make learning just as addictive as playing a computer game! I would like your help and have you implement a "course leaderboard" section on the existing courses which displays a list of users and their points in that particular course. I will elaborate a bit on this below. Remember that each course has a slug based on the pattern `/courses/{course-slug}`, e.g. `/courses/beginners-guide-to-user-experience`).
->  
+>
 > This is an example of how the leaderboard section should look:
 >
 > ![image](https://user-images.githubusercontent.com/5278175/50387670-7e861400-0713-11e9-95fd-3f8c3316a070.png)
@@ -27,7 +27,7 @@ Our Designer (feature requester) wrote the following:
 > - display a maximum of 9 users on the leaderboard of a given course
 > - always display the 3 users with the **highest** score of a given course
 > - always display the 3 users with the **lowest** score of a given course
-> - always show the currently logged-in user's position in a section surrounded by 2 other course participants. 
+> - always show the currently logged-in user's position in a section surrounded by 2 other course participants.
 > - if a user has the **same** amount of points as another participant, then the currently logged-in user should be displayed higher than the other one with the same score as him/her. In other words, his/her position on the leaderboard should be "rounded up" if he has the same score as others.
 > - logged-in user should be in bold
 
@@ -43,10 +43,10 @@ Leaderboard data should always be up to date (any enrolment score can be changed
 
 You can do everything you want in order to implement this feature:
  - Change the DB structure
- - Move significant parts of the logic to the DB 
- - Move significant parts of the logic to the back-end 
- - Move significant parts of the logic to the front-end, or load data by AJAX (if so, please use Vanilla JS or Vue.js) 
- - Move significant parts of the logic to ... Okay.. you get it... We don't want to limit your ideas :) 
+ - Move significant parts of the logic to the DB
+ - Move significant parts of the logic to the back-end
+ - Move significant parts of the logic to the front-end, or load data by AJAX (if so, please use Vanilla JS or Vue.js)
+ - Move significant parts of the logic to ... Okay.. you get it... We don't want to limit your ideas :)
 
 We will be evaluating the following aspects:
  - Your ability to design the overall project architecture and keep it consistent with your implementation (note: frequent atomic commits are welcome!).
@@ -73,11 +73,14 @@ In addition to that, we included a basic Docker Compose config.
 So, if you are already a docker user, you simply need to execute the following commands:
 
 ```sh
-# install composer dependencies 
+# Rename .env.docker.example to .env
+cp .env.docker.example .env
+
+# Install composer dependencies
 docker run --rm --interactive --tty --volume $PWD:/app composer install
 
 # Build, (re)create and start containers for a service.
-docker-compose up
+docker-compose up -d
 
 # Run all migrations and seed the DB
 docker-compose exec workspace php artisan migrate:fresh --seed
@@ -88,12 +91,12 @@ docker-compose exec workspace php artisan key:generate
 
 If everything worked well, a project should be accessible by [http://localhost:8880](http://localhost:8880).
 
-Got problems? Help us improve this code challenge by writing to us. We're happy to help :-) 
+Got problems? Help us improve this code challenge by writing to us. We're happy to help :-)
 
 
 ### B) Local/Virtual Machine
 ```sh
-# install composer dependencies 
+# Install composer dependencies
 composer install
 
 # Run all migrations and seed DB
@@ -108,7 +111,7 @@ Please log in at the `/login` page by using any auto-generated email address you
 The password for all auto-generated users is `secret`.
 
 After successful login you will be redirected to a page with a list of links to your course enrollments.
-Please click any of the links and you will be redirected to a page where you should implement your this challenge, i.e. the leaderboard.
+Please click any of the links and you will be redirected to a page where you should implement this challenge, i.e. the leaderboard.
 
 
 ## How to submit your solution
@@ -124,6 +127,6 @@ You can submit your solution in 2 ways:
 
 Hint: both GitHub and Bitbucket allow you to create a private repository for free.
 
-PS: I would greatly appreciate it if you kindly give us some feedback about this code-challenge: how it was interesting, challenging, clean, etc. 
+PS: I would greatly appreciate it if you kindly give us some feedback about this code-challenge: how it was interesting, challenging, clean, etc.
 
 🦄
