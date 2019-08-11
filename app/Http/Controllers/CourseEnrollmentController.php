@@ -28,7 +28,7 @@ class CourseEnrollmentController extends Controller
             return view('courses.show', compact('course'));
         }
 
-        $scores = $this->scores();
+        $scores = $this->scores($course->id);
         $slicedScores = $this->scoresSlices($scores);
 
         return view('courseEnrollments.show', compact('enrollment', 'slicedScores'));
@@ -80,10 +80,13 @@ class CourseEnrollmentController extends Controller
     /**
      *
      */
-    private function scores() : array
+    private function scores(int $courseId) : array
     {
         return DB::table('quiz_answers AS qa')
+            ->join('quizzes AS q', 'q.id', '=', 'qa.quiz_id')
+            ->join('lessons AS l', 'l.id', '=', 'q.lesson_id')
             ->join('users AS u', 'u.id', '=', 'qa.user_id')
+            ->where('l.course_id', '=', $courseId)
             ->groupBy('u.id')
             ->orderBy('score', 'DESC')
             ->orderBy(DB::raw('IF(u.id = ' . Auth::user()->id . ', 0, 1)'))
