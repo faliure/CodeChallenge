@@ -34,7 +34,7 @@
                         </p>
                         <div class="row">
                             <div class="col-md-6">
-                                <h4>You are ranked <b>{{ auth()->user()->countryRank }}</b> in {{ auth()->user()->country->name }}</h4>
+                                <h4>You are ranked <b>{{ $countryRank }}</b> in {{ auth()->user()->country->name }}</h4>
                                 <ul style="padding: 0px;">
                                     @foreach ($slicedScores['country'] as $place => $scoreData)
                                         <li class="courseRanking__rankItem"
@@ -60,7 +60,7 @@
                             </div>
 
                             <div class="col-md-6">
-                                <h4>You are ranked <b>{{ auth()->user()->worldRank }}</b> Worldwide</h4>
+                                <h4>You are ranked <b>{{ $globalRank }}</b> Worldwide</h4>
                                 <ul style="padding: 0px;">
                                     @foreach ($slicedScores['global'] as $place => $scoreData)
                                         <li class="courseRanking__rankItem"

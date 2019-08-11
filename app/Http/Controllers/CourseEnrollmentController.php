@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Course;
+use NumberFormatter;
 use App\CourseEnrollment;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\DB;
@@ -31,7 +32,17 @@ class CourseEnrollmentController extends Controller
         $scores = $this->scores($course->id);
         $slicedScores = $this->scoresSlices($scores);
 
-        return view('courseEnrollments.show', compact('enrollment', 'slicedScores'));
+        $globalRank = $this->userRank($slicedScores['global'], Auth::user()->id);
+        $countryRank = $this->userRank($slicedScores['country'], Auth::user()->id);
+
+        $formatter = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
+
+        return view('courseEnrollments.show', [
+            'enrollment'   => $enrollment,
+            'slicedScores' => $slicedScores,
+            'globalRank'   => $formatter->format($globalRank),
+            'countryRank'  => $formatter->format($countryRank),
+        ]);
     }
 
     public function store(string $slug)
@@ -44,6 +55,22 @@ class CourseEnrollmentController extends Controller
         $course->enroll(auth()->user());
 
         return redirect()->action([self::class, 'show'], [$course->slug]);
+    }
+
+    private function userRank(array $scores, int $userId)
+    {
+        $userRankItem = array_column($scores, null, 'user_id')[$userId];
+
+        return array_search($userRankItem, $scores) + 1;
+
+        /**
+         * Alternative algo - TODO : evaluate which one is better
+         */
+        // foreach ($scores as $zeroBasedRank => $rankItem) {
+        //     if ($rankItem->user_id === $userId) {
+        //         return $zeroBasedRank + 1;
+        //     }
+        // }
     }
 
     /**
