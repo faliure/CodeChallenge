@@ -3,16 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Course;
-use NumberFormatter;
 use App\CourseEnrollment;
+use App\Leaderboard;
 use Illuminate\Http\Response;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Contracts\Support\Renderable;
 
 class CourseEnrollmentController extends Controller
 {
-    public function show(string $slug) : Renderable
+    public function show(string $slug, Leaderboard $leaderboard) : Renderable
     {
         /** @var Course $course */
         $course = Course::query()
@@ -29,19 +27,9 @@ class CourseEnrollmentController extends Controller
             return view('courses.show', compact('course'));
         }
 
-        $scores = $this->scores($course->id);
-        $slicedScores = $this->scoresSlices($scores);
-
-        $globalRank = $this->userRank($slicedScores['global'], Auth::user()->id);
-        $countryRank = $this->userRank($slicedScores['country'], Auth::user()->id);
-
-        $formatter = new NumberFormatter('en_US', NumberFormatter::ORDINAL);
-
         return view('courseEnrollments.show', [
-            'enrollment'   => $enrollment,
-            'slicedScores' => $slicedScores,
-            'globalRank'   => $formatter->format($globalRank),
-            'countryRank'  => $formatter->format($countryRank),
+            'enrollment'      => $enrollment,
+            'leaderboardCard' => $leaderboard->board($course->id),
         ]);
     }
 
@@ -55,70 +43,5 @@ class CourseEnrollmentController extends Controller
         $course->enroll(auth()->user());
 
         return redirect()->action([self::class, 'show'], [$course->slug]);
-    }
-
-    private function userRank(array $scores, int $userId)
-    {
-        $userRankItem = array_column($scores, null, 'user_id')[$userId];
-
-        return array_search($userRankItem, $scores) + 1;
-
-        /**
-         * Alternative algo - TODO : evaluate which one is better
-         */
-        // foreach ($scores as $zeroBasedRank => $rankItem) {
-        //     if ($rankItem->user_id === $userId) {
-        //         return $zeroBasedRank + 1;
-        //     }
-        // }
-    }
-
-    /**
-     *
-     */
-    private function scoresSlices(array $globalScores) : array
-    {
-        $userCountryId = Auth::user()->country_id;
-
-        $countryScores = array_values(
-            array_filter($globalScores, function($score) use ($userCountryId) {
-                return $score->country_id === $userCountryId;
-            })
-        );
-
-        return [
-            'global'  => $this->slicedScores($globalScores),
-            'country' => $this->slicedScores($countryScores),
-        ];
-    }
-
-    /**
-     *
-     */
-    private function slicedScores($scores)
-    {
-        $currentUserRank = array_search(Auth::user()->id, array_column($scores, 'user_id'));
-
-        return array_slice($scores, 0, 3, true)                     // First 3
-             + array_slice($scores, $currentUserRank - 1, 3, true)  // User-centred 3
-             + array_slice($scores, -3, 3, true);                   // Last 3
-    }
-
-    /**
-     *
-     */
-    private function scores(int $courseId) : array
-    {
-        return DB::table('quiz_answers AS qa')
-            ->join('quizzes AS q', 'q.id', '=', 'qa.quiz_id')
-            ->join('lessons AS l', 'l.id', '=', 'q.lesson_id')
-            ->join('users AS u', 'u.id', '=', 'qa.user_id')
-            ->where('l.course_id', '=', $courseId)
-            ->groupBy('u.id')
-            ->orderBy('score', 'DESC')
-            ->orderBy(DB::raw('IF(u.id = ' . Auth::user()->id . ', 0, 1)'))
-            ->select('qa.user_id', DB::Raw('u.name AS user_name'), 'u.country_id', DB::raw('SUM(score) AS score'))
-            ->get()
-            ->toArray();
     }
 }

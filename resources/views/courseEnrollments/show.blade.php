@@ -24,7 +24,7 @@
                     </div>
                 </div>
 
-                @include('leaderboard.card')
+                {!! $leaderboardCard !!}
             </div>
         </div>
     </div>

@@ -14,15 +14,19 @@
         </p>
         <div class="row">
             <div class="col-md-6">
-                @include('leaderboard.sliced', [
-                    'title'  => "You are ranked <b>$countryRank</b> in " . auth()->user()->country->name,
+                @include('leaderboard.board', [
+                    'title'  => "You are ranked <b>"
+                              . (new \NumberFormatter('en_US', \NumberFormatter::ORDINAL))->format($countryRank)
+                            . "</b> in " . auth()->user()->country->name,
                     'scores' => $slicedScores['country']
                 ])
             </div>
 
             <div class="col-md-6">
-                @include('leaderboard.sliced', [
-                    'title'  => "You are ranked <b>$globalRank</b> Worldwide",
+                @include('leaderboard.board', [
+                    'title'  => "You are ranked <b>"
+                              . (new \NumberFormatter('en_US', \NumberFormatter::ORDINAL))->format($globalRank)
+                            . "</b> Worldwide",
                     'scores' => $slicedScores['global']
                 ])
             </div>
