@@ -24,7 +24,10 @@
                     </div>
                 </div>
 
-                {!! $leaderboardCard !!}
+                @include('leaderboard.board', [
+                    'leaderboard' => $leaderboard,
+                    'preview'     => true,
+                ])
             </div>
         </div>
     </div>

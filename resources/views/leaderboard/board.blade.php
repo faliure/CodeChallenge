@@ -1,29 +1,31 @@
 <?php
 /**
- * @var array  $scores
- * @var string $title
+ * @var App\Leaderboard  $leaderboard
+ * @var bool             $preview      Show only main slices of the Leaderboard (first, last, and middle slice)
  */
 ?>
-<h4>{!! $title ?? 'Leaderboard' !!}</h4>
-<ul style="padding: 0px;">
-    @foreach ($scores as $rank => $rankItem)
-        <li class="courseRanking__rankItem"
-            style="display: flex; flex-direction: row; padding: 10px;">
-            <div class="position"
-                style="font-size: 28px; color: rgb(132, 132, 132); text-align: right; width: 80px; padding-right: 10px;">
-                {{ $rank + 1 }}
-            </div>
-            <div class="info">
-                <div style="font-size: 16px;">
-                    {!! $rankItem->user_id === auth()->user()->id ? '<b>' : '' !!}
-                        {{ $rankItem->user_name }}
-                    {!! $rankItem->user_id === auth()->user()->id ? '</b>' : '' !!}
-                </div>
-                <div class="score" style="font-size: 10px; color: rgb(132, 132, 132);">
-                    {{ $rankItem->score }} PTS (+93 -- TODO --)
-                </div>
-            </div>
-        </li>
-        {!! !$loop->last && !isset($scores[$rank + 1]) ? '<hr />' : '' !!}
-    @endforeach
-</ul>
+<div class="card mt-4">
+    <h2 class="card-header">Statistics</h2>
+    <div class="card-body">
+        <p>
+            Your rankings improve every time you answer a question correctly.
+            Keep learning and earning course points to become one of our top learners!
+        </p>
+
+        <div class="row">
+            @include('leaderboard.card', [
+                'rank' => $preview
+                        ? $leaderboard->getCountryRank()->getPreviewRank()
+                        : $leaderboard->getCountryRank(),
+                'isGlobal' => false,
+            ])
+
+            @include('leaderboard.card', [
+                'rank' => $preview
+                        ? $leaderboard->getGlobalRank()->getPreviewRank()
+                        : $leaderboard->getGlobalRank(),
+                'isGlobal' => true,
+            ])
+        </div>
+    </div>
+</div>
