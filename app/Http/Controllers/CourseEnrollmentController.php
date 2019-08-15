@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Course;
 use App\CourseEnrollment;
 use App\Leaderboard;
-use Illuminate\Http\Response;
 use Illuminate\Contracts\Support\Renderable;
+use Illuminate\Http\Response;
 
 class CourseEnrollmentController extends Controller
 {
-    public function show(string $slug, Leaderboard $leaderboard) : Renderable
+    public function show(string $slug) : Renderable
     {
         /** @var Course $course */
         $course = Course::query()
@@ -27,10 +27,9 @@ class CourseEnrollmentController extends Controller
             return view('courses.show', compact('course'));
         }
 
-        return view('courseEnrollments.show', [
-            'enrollment'      => $enrollment,
-            'leaderboardCard' => $leaderboard->board($course->id),
-        ]);
+        $leaderboard = new Leaderboard($course->id);
+
+        return view('courseEnrollments.show', compact('enrollment', 'leaderboard'));
     }
 
     public function store(string $slug)
