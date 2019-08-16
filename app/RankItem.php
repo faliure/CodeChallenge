@@ -29,9 +29,15 @@ final class RankItem
 
     private function validate($item): RankItem
     {
+        if (!is_object($item)) {
+            throw new \InvalidArgumentException('RankItem input must be an object');
+        }
+
         foreach (static::REQUIRED_PROPERTIES as $property) {
             if (!isset($item->$property)) {
-                throw new \Exception('Invalid rankItem: missing property "' . $property . '"');
+                throw new \InvalidArgumentException(
+                    'Invalid rankItem: missing required property "' . $property . '"'
+                );
             }
         }
 
