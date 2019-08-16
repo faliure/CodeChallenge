@@ -6,17 +6,17 @@
 ?>
 <div class="col-md-6">
     <h4>
-        You are ranked <b> {{ $rank->getFormattedUserRank() ?? '--' }} </b>
+        You are ranked <b> {{ $rank->getFormattedUserPosition() ?? '--' }} </b>
         {{ $isGlobal ? 'Worldwide' : 'in ' . auth()->user()->country->name }}
     </h4>
 
     <ul style="padding: 0px;">
         @php
             $currentUserId = auth()->user()->id;
-            $userScore = $rank->getRankItem()->score;
+            $userScore = $rank->getUserRankItem()->score;
         @endphp
 
-        @foreach ($rank->rankItems as $rankItem)
+        @foreach ($rank->items() as $rankItem)
             <li class="courseRanking__rankItem"
                 style="display: flex; flex-direction: row; padding: 10px;">
                 <div class="position"
@@ -36,7 +36,7 @@
                 </div>
             </li>
 
-            {!! !$loop->last && !$rank->hasNextPosition($rankItem->position) ? '<hr />' : '' !!}
+            {!! !$loop->last && !$rank->hasNext($rankItem) ? '<hr />' : '' !!}
         @endforeach
     </ul>
 </div>

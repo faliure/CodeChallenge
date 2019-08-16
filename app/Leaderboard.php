@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Interfaces\Rank;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -34,9 +35,9 @@ final class Leaderboard
     /**
      *
      */
-    public function getGlobalRank(bool $previewOnly = true)
+    public function getGlobalRank(bool $previewOnly = true): Rank
     {
-        $rank = new Rank($this->scores);
+        $rank = resolve(Rank::class, $this->scores);
 
         return $previewOnly ? $rank->getPreviewRank() : $rank;
     }
@@ -44,9 +45,9 @@ final class Leaderboard
     /**
      *
      */
-    public function getCountryRank(?int $countryId = null, bool $previewOnly = true)
+    public function getCountryRank(?int $countryId = null, bool $previewOnly = true): Rank
     {
-        $rank = (new Rank($this->scores))->getCountryRank($countryId);
+        $rank = resolve(Rank::class, $this->scores)->getCountryRank($countryId);
 
         return $previewOnly ? $rank->getPreviewRank() : $rank;
     }
@@ -69,6 +70,6 @@ final class Leaderboard
             $query->where('l.course_id', '=', $this->courseId);
         }
 
-        return $query->get()->all();
+        return $query->get()->toArray();
     }
 }

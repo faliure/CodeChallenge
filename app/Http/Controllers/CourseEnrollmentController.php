@@ -10,7 +10,7 @@ use Illuminate\Http\Response;
 
 class CourseEnrollmentController extends Controller
 {
-    public function show(string $slug) : Renderable
+    public function show(string $slug): Renderable
     {
         /** @var Course $course */
         $course = Course::query()

@@ -2,88 +2,80 @@
 
 namespace App;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Interfaces\Rank as RankInterface;
+use App\RankItem;
+use App\RankSlicer;
 
-class Rank extends Model
+final class Rank implements RankInterface
 {
     /**
      * @var array
      */
-    private $_rankItems = [];
-
-    /**
-     * @var array
-     */
-    private $rankItemValues = [];
+    private $items = [];
 
     /**
      *
      */
-    public function __construct(array $rankItems)
+    public function __construct(array $items)
     {
-        // Add position attribute to each rank item
-        array_walk($rankItems, function($rankItem, $index) {
-            $newRankItem = clone $rankItem;
-            $newRankItem->position = $index + 1;
-
-            $this->_rankItems[$index] = $newRankItem;
-        });
-
-        // For outside use we don't need the positions as index
-        $this->rankItemValues = array_values($this->_rankItems);
+        array_walk($items, [$this, 'registerRankItem']);
     }
 
     /**
-     * When someone requests the rankItems list, return the regular array
-     * (i.e. the one with consecutive indexes starting from zero).
-     *
-     * @var $name  The name of the undefined property being accessed
-     *
-     * @return array|null
+     * @return array
      */
-    public function __get($name)
+    public function items(): array
     {
-        if ($name === 'rankItems') {
-            return $this->rankItemValues;
+        return $this->items;
+    }
+
+    public function itemsCount(): int
+    {
+        return count($this->items);
+    }
+
+    /**
+     *
+     */
+    public function hasNext(RankItem $item): bool
+    {
+        return isset($this->items[$item->position]);
+    }
+
+    /**
+     *
+     */
+    public function getUserPosition(?int $userId = null): ?int
+    {
+        $userId = $userId ?? auth()->user()->id;
+
+        return array_search($this->getUserRankItem($userId), $this->items) + 1 ?: null;
+    }
+
+    /**
+     *
+     */
+    public function getUserRankItem(?int $userId = null): RankItem
+    {
+        $userId = $userId ?? auth()->user()->id;
+
+        foreach ($this->items as $item) {
+            if ($item->user_id === $userId) {
+                return $item;
+            }
         }
+dd($this->items);
+        // return array_column($this->items, null, 'user_id')[$userId];
     }
 
     /**
      *
      */
-    public function hasNextPosition(int $currentPosition)
-    {
-        return isset($this->_rankItems[$currentPosition]);
-    }
-
-    /**
-     *
-     */
-    public function getUserRank(?int $userId = null) : ?int
+    public function getFormattedUserPosition(?int $userId = null): string
     {
         $userId = $userId ?? auth()->user()->id;
 
-        return array_search($this->getRankItem($userId), $this->_rankItems) + 1 ?: null;
-    }
-
-    /**
-     *
-     */
-    public function getRankItem(?int $userId = null) : \stdClass
-    {
-        $userId = $userId ?? auth()->user()->id;
-
-        return array_column($this->_rankItems, null, 'user_id')[$userId];
-    }
-
-    /**
-     *
-     */
-    public function getFormattedUserRank(?int $userId = null) : string
-    {
-        $userId = $userId ?? auth()->user()->id;
-
-        $userRank = $this->getUserRank($userId);
+        $userRank = $this->getUserPosition($userId);
 
         $formatter = new \NumberFormatter('en_US', \NumberFormatter::ORDINAL);
 
@@ -93,50 +85,30 @@ class Rank extends Model
     /**
      *
      */
-    public function getCountryRank(?int $countryId = null) : Rank
+    public function getCountryRank(?int $countryId = null): RankInterface
     {
         $countryId = $countryId ?? auth()->user()->country_id;
 
-        $countryRank = array_values(
-            array_filter($this->_rankItems, function($rankItem) use ($countryId) {
-                return $rankItem->country_id === $countryId;
-            })
-        );
+        $countryItems = array_filter($this->items, function(RankItem $item) use ($countryId) {
+            return $item->country_id === $countryId;
+        });
 
-        return new static($countryRank);
+        return new static(array_values($countryItems));
     }
 
     /**
      *
      */
-    public function getPreviewRank() : Rank
+    public function getPreviewRank(): RankInterface
     {
-        if (count($this->_rankItems) <= 9) {
-            return new static($this->_rankItems);
-        }
-
-        $rankItems = array_slice($this->_rankItems, 0, 3, true)                                 // First-3 slice
-                   + array_slice($this->_rankItems, max(0, $this->getUserRank() - 2), 3, true)  // User-centred slice
-                   + $this->getMiddleSlice()                                                    // Middle slice
-                   + array_slice($this->_rankItems, -3, 3, true);                               // Last-3 slice
-
-        return new static($rankItems);
+        return new static(RankSlicer::process($this));
     }
 
-    private function getMiddleSlice() : array
+    private function registerRankItem($item, int $index)
     {
-        $userRank = $this->getUserRank();
-        $itemsCount = count($this->_rankItems);
+        $freshItem = clone $item;
+        $freshItem->position = $index + 1;
 
-        if ($userRank > 4 && $userRank < $itemsCount - 3) {
-            return []; // No middle slice required
-        }
-
-        return array_slice(
-            $this->_rankItems,                                          // Full rank
-            floor(count($this->_rankItems) / 2) - 1,                    // Middle slice offset
-            min(3, 4 - min($userRank - 1, $itemsCount - $userRank)),    // Middle slice length
-            true                                                        // Preserve keys (position)
-        );
+        $this->items[$index] = RankItem::create($freshItem);
     }
 }
