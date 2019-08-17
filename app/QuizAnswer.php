@@ -6,6 +6,7 @@ use App\Events\QuizAnswerEvaluated;
 use App\Events\QuizAnswerEvaluating;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * @property int $id
@@ -32,8 +33,9 @@ final class QuizAnswer extends Model
     public function grade(int $score, GraderInterface $gradedBy): void
     {
         $maxScore = $this->quiz->max_score;
-        if ($score > $this->quiz->max_score) {
-            throw new \OutOfBoundsException("Score can not be higher that maximum for this quiz (max={$maxScore})");
+
+        if ($score > $maxScore) {
+            throw new \OutOfBoundsException("Score cannot be higher than the maximum for this quiz (max={$maxScore})");
         }
 
         event(new QuizAnswerEvaluating($this, $score, $gradedBy));
@@ -42,5 +44,7 @@ final class QuizAnswer extends Model
         $this->save();
 
         event(new QuizAnswerEvaluated($this, $score, $gradedBy));
+
+        Leaderboard::forgetCachedScores($this->quiz->lesson->course_id);
     }
 }

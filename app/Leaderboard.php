@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Interfaces\Rank;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -18,7 +19,15 @@ final class Leaderboard
 
     public function __construct(?int $courseId)
     {
-        $this->scores = $this->fetchScores($courseId);
+        $this->scores = $this->scores($courseId);
+    }
+
+    /**
+     * Invalidate scores cache for a given course.
+     */
+    public static function forgetCachedScores(int $courseId): void
+    {
+        Cache::forget(static::scoresCacheKey($courseId));
     }
 
     /**
@@ -51,6 +60,18 @@ final class Leaderboard
     }
 
     /**
+     * Get scores from cache or fetch from database if not found in cache.
+     */
+    private function scores(int $courseId): array
+    {
+        $cacheKey = static::scoresCacheKey($courseId);
+
+        return Cache::remember($cacheKey, 300, function() use ($courseId) {
+            return $this->fetchScores($courseId);
+        });
+    }
+
+    /**
      * Fetch an ordered list of student scores for a given course.
      */
     private function fetchScores(int $courseId): array
@@ -66,8 +87,10 @@ final class Leaderboard
             ->orderBy(DB::raw('IF(u.id = ' . auth()->user()->id . ', 0, 1)'));
 
         return $query->get()->toArray();
-        }
+    }
 
-        return $query->get()->toArray();
+    private static function scoresCacheKey(int $courseId): string
+    {
+        return 'leaderboard:scores:' . $courseId;
     }
 }
