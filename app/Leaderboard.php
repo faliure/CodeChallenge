@@ -23,14 +23,6 @@ final class Leaderboard
     }
 
     /**
-     * Invalidate scores cache for a given course.
-     */
-    public static function forgetCachedScores(int $courseId): void
-    {
-        Cache::forget(static::scoresCacheKey($courseId));
-    }
-
-    /**
      * Get a Rank object for the global rank of the current course.
      *
      * @param bool     $previewOnly If true, get a short version of the rank (e.g. slices)
@@ -57,6 +49,14 @@ final class Leaderboard
         $rank = resolve(Rank::class, $this->scores)->getCountryRank($countryId);
 
         return $previewOnly ? $rank->getPreviewRank() : $rank;
+    }
+
+    /**
+     * Invalidate scores cache for a given course.
+     */
+    public static function forgetCachedScores(int $courseId): void
+    {
+        Cache::forget(static::scoresCacheKey($courseId));
     }
 
     /**
