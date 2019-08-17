@@ -89,3 +89,9 @@ services:
       MYSQL_DATABASE: "${DB_DATABASE}"
       MYSQL_USER: "${DB_USERNAME}"
       MYSQL_PASSWORD: "${DB_PASSWORD}"
+
+  redis:
+    container_name: idf-redis
+    image: redis:4.0
+    ports:
+      - "6382:6379"
