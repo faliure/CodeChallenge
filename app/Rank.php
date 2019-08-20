@@ -64,8 +64,6 @@ final class Rank implements RankInterface
                 return $item;
             }
         }
-dd($this->items);
-        // return array_column($this->items, null, 'user_id')[$userId];
     }
 
     /**
