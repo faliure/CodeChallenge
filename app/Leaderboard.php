@@ -17,7 +17,7 @@ final class Leaderboard
      */
     private $scores;
 
-    public function __construct(?int $courseId)
+    public function __construct(int $courseId)
     {
         $this->scores = $this->scores($courseId);
     }
