@@ -47,7 +47,7 @@ final class Rank implements RankInterface
      */
     public function getUserPosition(?int $userId = null): ?int
     {
-        $userId = $userId ?? auth()->user()->id;
+        $userId = $userId ?? auth()->id();
 
         return array_search($this->getUserRankItem($userId), $this->items) + 1 ?: null;
     }
@@ -57,7 +57,7 @@ final class Rank implements RankInterface
      */
     public function getUserRankItem(?int $userId = null): RankItem
     {
-        $userId = $userId ?? auth()->user()->id;
+        $userId = $userId ?? auth()->id();
 
         foreach ($this->items as $item) {
             if ($item->user_id === $userId) {
@@ -71,7 +71,7 @@ final class Rank implements RankInterface
      */
     public function getFormattedUserPosition(?int $userId = null): string
     {
-        $userId = $userId ?? auth()->user()->id;
+        $userId = $userId ?? auth()->id();
 
         $userRank = $this->getUserPosition($userId);
 

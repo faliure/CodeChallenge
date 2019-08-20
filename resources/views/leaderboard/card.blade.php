@@ -12,7 +12,7 @@
 
     <ul style="padding: 0px;">
         @php
-            $currentUserId = auth()->user()->id;
+            $currentUserId = auth()->id();
             $userScore = $rank->getUserRankItem()->score;
         @endphp
 

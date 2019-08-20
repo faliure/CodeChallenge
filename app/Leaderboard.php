@@ -84,7 +84,7 @@ final class Leaderboard
             ->where('l.course_id', '=', $courseId)
             ->groupBy('u.id')
             ->orderBy('score', 'DESC')
-            ->orderBy(DB::raw('IF(u.id = ' . auth()->user()->id . ', 0, 1)'));
+            ->orderBy(DB::raw('IF(u.id = ' . auth()->id() . ', 0, 1)'));
 
         return $query->get()->toArray();
     }
