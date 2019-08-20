@@ -44,7 +44,5 @@ final class QuizAnswer extends Model
         $this->save();
 
         event(new QuizAnswerEvaluated($this, $score, $gradedBy));
-
-        Leaderboard::forgetCachedScores($this->quiz->lesson->course_id);
     }
 }
