@@ -6,14 +6,14 @@
 ?>
 <div class="col-md-6">
     <h4>
-        You are ranked <b> {{ $rank->getFormattedUserPosition() ?? '--' }} </b>
-        {{ $isGlobal ? 'Worldwide' : 'in ' . auth()->user()->country->name }}
+        You are ranked <b> {{ $rank->ordinalUserPosition() ?? '--' }} </b>
+        {{ $rank->isGlobal() ? 'Worldwide' : 'in ' . auth()->user()->country->name }}
     </h4>
 
     <ul style="padding: 0px;">
         @php
             $currentUserId = auth()->id();
-            $userScore = $rank->getUserRankItem()->score;
+            $userScore = $rank->userRankItem()->score;
         @endphp
 
         @foreach ($rank->items() as $rankItem)

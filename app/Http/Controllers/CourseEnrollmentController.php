@@ -27,9 +27,10 @@ class CourseEnrollmentController extends Controller
             return view('courses.show', compact('course'));
         }
 
-        $leaderboard = new Leaderboard($course->id);
-
-        return view('courseEnrollments.show', compact('enrollment', 'leaderboard'));
+        return view('courseEnrollments.show', [
+            'enrollment'  => $enrollment,
+            'leaderboard' => (new Leaderboard)->forCourse($course->id),
+        ]);
     }
 
     public function store(string $slug)

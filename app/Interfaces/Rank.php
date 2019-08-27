@@ -25,25 +25,25 @@ interface Rank
     /**
      * Get the rank position of a user (defaults to current user).
      */
-    public function getUserPosition(?int $userId = null): ?int;
+    public function userPosition(?int $userId = null): ?int;
+
+    /**
+     * Get the rank position of a user (defaults to current user), as an ordinal (e.g. "7th").
+     */
+    public function ordinalUserPosition(?int $userId = null): string;
 
     /**
      * Get the rankItem object for a user (defaults to current user).
      */
-    public function getUserRankItem(?int $userId = null): RankItem;
-
-    /**
-     * Get a visual representation of the user's position (e.g. "7th") (defaults to current user).
-     */
-    public function getFormattedUserPosition(?int $userId = null): string;
+    public function userRankItem(?int $userId = null): RankItem;
 
     /**
      * Get a new Rank object, with rankItems filtered by country (defaults to current user's country).
      */
-    public function getCountryRank(?int $countryId = null): Rank;
+    public function forCountry(int $countryId): Rank;
 
     /**
      * Get a new Rank object, with a subset of the original rank (e.g. first 10)
      */
-    public function getPreviewRank(): Rank;
+    public function summarize(): Rank;
 }

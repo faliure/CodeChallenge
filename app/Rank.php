@@ -14,6 +14,11 @@ final class Rank implements RankInterface
     private $items = [];
 
     /**
+     * @var bool
+     */
+    protected $isGlobal = true;
+
+    /**
      *
      */
     public function __construct(array $items)
@@ -21,21 +26,29 @@ final class Rank implements RankInterface
         array_walk($items, [$this, 'registerRankItem']);
     }
 
+    public function isGlobal()
+    {
+        return $this->isGlobal;
+    }
+
     /**
-     * @return array
+     * Fetch the list of RankItems in the current Rank.
      */
     public function items(): array
     {
         return $this->items;
     }
 
+    /**
+     * Get the amount of RankItems in the current Rank.
+     */
     public function itemsCount(): int
     {
         return count($this->items);
     }
 
     /**
-     *
+     * Return whether the consecutive position after $item's exists in the current Rank.
      */
     public function hasNext(RankItem $item): bool
     {
@@ -43,19 +56,44 @@ final class Rank implements RankInterface
     }
 
     /**
-     *
+     * Get the position in the rank for a given user (currently logged in user if $userId is ommitted).
      */
-    public function getUserPosition(?int $userId = null): ?int
+    public function userPosition(?int $userId = null): ?int
     {
         $userId = $userId ?? auth()->id();
 
-        return array_search($this->getUserRankItem($userId), $this->items) + 1 ?: null;
+        return array_search($this->userRankItem($userId), $this->items) + 1 ?: null;
     }
 
     /**
-     *
+     * Get the rank position of a user (defaults to current user), as an ordinal (e.g. "7th").
      */
-    public function getUserRankItem(?int $userId = null): RankItem
+    public function ordinalUserPosition(?int $userId = null): string
+    {
+        $formatter = new \NumberFormatter('en_US', \NumberFormatter::ORDINAL);
+
+        return $formatter->format($this->userPosition($userId));
+    }
+
+    /**
+     * Get a new Rank as a subset with RankItems from a given country only.
+     */
+    public function forCountry(int $countryId): RankInterface
+    {
+        $countryItems = array_filter($this->items, function(RankItem $item) use ($countryId) {
+            return $item->country_id === $countryId;
+        });
+
+        $countryRank = new static(array_values($countryItems));
+        $countryRank->isGlobal = false;
+
+        return $countryRank;
+    }
+
+    /**
+     * Get the RankItem for a given user (currently logged in user if $userId is ommitted).
+     */
+    public function userRankItem(?int $userId = null): RankItem
     {
         $userId = $userId ?? auth()->id();
 
@@ -67,41 +105,20 @@ final class Rank implements RankInterface
     }
 
     /**
-     *
+     * Get a new Rank with just a summary of the positions.
      */
-    public function getFormattedUserPosition(?int $userId = null): string
+    public function summarize(): RankInterface
     {
-        $userId = $userId ?? auth()->id();
+        $summarizedRank = new static(RankSlicer::process($this));
 
-        $userRank = $this->getUserPosition($userId);
+        $summarizedRank->isGlobal = $this->isGlobal;
 
-        $formatter = new \NumberFormatter('en_US', \NumberFormatter::ORDINAL);
-
-        return $formatter->format($userRank);
+        return $summarizedRank;
     }
 
     /**
-     *
+     * Add a RankItem to the current Rank.
      */
-    public function getCountryRank(?int $countryId = null): RankInterface
-    {
-        $countryId = $countryId ?? auth()->user()->country_id;
-
-        $countryItems = array_filter($this->items, function(RankItem $item) use ($countryId) {
-            return $item->country_id === $countryId;
-        });
-
-        return new static(array_values($countryItems));
-    }
-
-    /**
-     *
-     */
-    public function getPreviewRank(): RankInterface
-    {
-        return new static(RankSlicer::process($this));
-    }
-
     private function registerRankItem($item, int $index)
     {
         $freshItem = clone $item;

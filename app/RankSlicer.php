@@ -32,14 +32,14 @@ final class RankSlicer
 
     private static function userSlice(Rank $rank)
     {
-        $offset = max(0, $rank->getUserPosition() - 2);
+        $offset = max(0, $rank->userPosition() - 2);
 
         return array_slice($rank->items(), $offset, 3, true);
     }
 
     private static function middleSlice(Rank $rank): array
     {
-        $userPosition = $rank->getUserPosition();
+        $userPosition = $rank->userPosition();
 
         $offset = floor(count($rank->items()) / 2) - 1;
         $length = min(3, 4 - min($userPosition - 1, $rank->itemsCount() - $userPosition));
@@ -59,7 +59,7 @@ final class RankSlicer
      */
     private static function needsMiddleSlice(Rank $rank)
     {
-        $userPosition = $rank->getUserPosition();
+        $userPosition = $rank->userPosition();
 
         return ($userPosition < 5 || $userPosition > $rank->itemsCount() - 4);
     }

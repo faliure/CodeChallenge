@@ -14,17 +14,15 @@
 
         <div class="row">
             @include('leaderboard.card', [
-                'rank' => $preview
-                        ? $leaderboard->getCountryRank()->getPreviewRank()
-                        : $leaderboard->getCountryRank(),
-                'isGlobal' => false,
+                'rank' => $summary
+                        ? $leaderboard->countryRank(auth()->user()->country_id)->summarize()
+                        : $leaderboard->countryRank(auth()->user()->country_id),
             ])
 
             @include('leaderboard.card', [
-                'rank' => $preview
-                        ? $leaderboard->getGlobalRank()->getPreviewRank()
-                        : $leaderboard->getGlobalRank(),
-                'isGlobal' => true,
+                'rank' => $summary
+                        ? $leaderboard->globalRank()->summarize()
+                        : $leaderboard->globalRank(),
             ])
         </div>
     </div>

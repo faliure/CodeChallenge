@@ -24,10 +24,12 @@
                     </div>
                 </div>
 
-                @include('leaderboard.board', [
-                    'leaderboard' => $leaderboard,
-                    'preview'     => true,
-                ])
+                <div id="leaderboard-container">
+                    @include('leaderboard.board', [
+                        'leaderboard' => $leaderboard,
+                        'summary'     => true,
+                    ])
+                </div>
             </div>
         </div>
     </div>
